@@ -1,0 +1,9 @@
+# Fast multi-node cluster for CKA drills (workloads, networking, RBAC, scheduling).
+# NOTE: kind cannot practice kubeadm upgrade / etcd-restore realistically — use real kubeadm VMs for those.
+#   kind create cluster --config sources/kind-multinode.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
