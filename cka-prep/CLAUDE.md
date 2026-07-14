@@ -58,8 +58,12 @@ kind create cluster --config sources/kind-multinode.yaml
 - `progress.md` — the single source of truth for status. Update it every day.
 - `01_map.md` — the CKA domain knowledge map + weights + checklist.
 - `goal.md` — the fixed target and success criteria.
+- `plan.md` — the ~3-week full-time day-by-day plan (topic, deliverable, milestone test per day). Follow this sequence unless `progress.md` indicates a day should be repeated.
 - `sources.md` — approved study/reference material (exam-legal docs first).
+- `sources/` — reusable configs, e.g. `kind-multinode.yaml` for the fast multi-node kind cluster.
 - `notes/` — one file per topic, kebab-numbered (`01_pods.md`).
-- `exercises/` — one folder per topic: `tasks.md` (no answers) + `solutions.md`.
-- `reviews/` — weekly retros and mock-exam scorecards.
+- `exercises/` — one folder per topic: `tasks.md` (no answers) + `solutions.md`. Start from `exercises/00_template/`.
+- `reviews/` — weekly retros and mock-exam scorecards. Start from `reviews/week_00_template.md`.
 - `project/` — the capstone: full timed mock exams and the final scorecard.
+
+When the learner says "Start Day N", look up Day N in `plan.md` and run the daily loop against it.
