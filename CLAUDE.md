@@ -9,17 +9,24 @@ A personal Kubernetes learning lab: a collection of raw manifests (Pods, Deploym
 ## Structure
 
 - `lab01/` — namespace exercise (`ns.yaml`).
-- `deployments/` — Pod and Deployment experiments (`nginx*.yaml`, `deploy.yaml`, `nginx-pod.yaml` with an emptyDir volume shared between nginx + busybox sidecar). These are cluster-scoped / default-namespace resources, not tied to a specific namespace.
-- `mealie/` — a self-contained app: namespace (`mealie-ns.yaml`), `deployment.yaml`, and `service.yaml` (LoadBalancer on port 9000). All three carry `namespace: mealie` and are wired together by the `app: mealie` label/selector.
+- `deployments/` — Pod and Deployment experiments (`nginx*.yaml`, `deploy.yaml`, `nginx-pod.yaml` with an emptyDir volume shared between nginx + busybox sidecar; `nginx-mealie.yaml` mounts the `mealie-data` PVC from the `mealie/` stack via a nginx+busybox sidecar pair). These are cluster-scoped / default-namespace resources, not tied to a specific namespace — but `nginx-mealie.yaml` depends on the `mealie` namespace's PVC.
+- `mealie/` — a self-contained app: namespace (`mealie-ns.yaml`), `storage.yaml` (a `mealie-data` PersistentVolumeClaim, 500Mi RWO), `deployment.yaml` (mounts the `mealie-data` claim), and `service.yaml` (LoadBalancer on port 9000). All carry `namespace: mealie` and are wired together by the `app: mealie` label/selector and the shared `mealie-data` claim name.
+- `monitoring/` — `prometheus-default-values.yaml`: the upstream Helm values file for the `kube-prometheus-stack` chart (not a manifest — install via Helm, not `kubectl apply`).
 
 ## Working with manifests
 
 Apply order matters: create a namespace before the resources that reference it.
 
+The `monitoring/` file is a Helm values file, not a manifest — it is consumed by `helm install ... -f monitoring/prometheus-default-values.yaml`, never `kubectl apply`.
+
 ```bash
-# mealie stack (namespace first)
+# mealie stack (namespace first, then PVC, then workload)
 kubectl apply -f mealie/mealie-ns.yaml
-kubectl apply -f mealie/          # deployment + service
+kubectl apply -f mealie/          # storage (PVC) + deployment + service
+
+# monitoring (Helm, not kubectl)
+helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  -f monitoring/prometheus-default-values.yaml
 
 # single resource
 kubectl apply -f deployments/nginx-pod.yaml
@@ -36,3 +43,4 @@ kubectl delete -f <file>
 
 - Deployments and their Services are matched by an `app: <name>` label; keep the Deployment's `template.metadata.labels`, its `selector.matchLabels`, and the Service `selector` in sync when editing.
 - Namespaced resources (the `mealie/` stack) must keep the `namespace:` field consistent across all files.
+- PVCs are referenced by `claimName`, not label: the `mealie-data` claim (`mealie/storage.yaml`) is mounted by both `mealie/deployment.yaml` and `deployments/nginx-mealie.yaml`. Keep the claim name in sync, and note a PVC is bound to one namespace — a pod in a different namespace cannot mount it.
