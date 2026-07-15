@@ -67,3 +67,22 @@ kind create cluster --config sources/kind-multinode.yaml
 - `project/` — the capstone: full timed mock exams and the final scorecard.
 
 When the learner says "Start Day N", look up Day N in `plan.md` and run the daily loop against it.
+
+## Re-runs and re-tests (never overwrite history)
+
+A day that is repeated — whether a re-run of the same material or a re-test of a 🟨 day — gets a
+**new incremented entry**, never an edit or deletion of the original:
+
+- First run of Day 1 → `Day 01`
+- Re-run / re-test → `Day 01.01`, then `Day 01.02`, and so on.
+
+Rules:
+- **Never delete or rewrite a past daily-log entry.** Scores stand as recorded, including bad ones.
+  The trend across `Day 02` → `Day 02.01` is the signal worth keeping — erasing it hides the
+  learning. If the learner asks for a "fresh start", reset the *cluster and lab state*, not the log.
+- Each re-run entry records: what changed since the previous attempt, the new score, and whether
+  the previously-logged weak areas are now green.
+- Update the status dashboard's **Last test** to the newest attempt, and strike weak-area backlog
+  items only when a re-run proves them green.
+- Notes/exercises files may be regenerated in place (`notes/02_rbac.md`); the *log* is the
+  append-only record.

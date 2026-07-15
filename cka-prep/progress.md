@@ -36,13 +36,15 @@ Legend: ⬜ not started · 🟨 in progress · 🟩 green (milestone ≥ 80%)
 ## Daily log
 
 > Copy the template below for each new day. Newest at the top.
+> **Re-runs are appended as `Day NN.01`, `Day NN.02` — never overwrite a past entry.** (See `CLAUDE.md`.)
 
-### Day NN — YYYY-MM-DD — <topic> (Domain <n>)
+### Day NN[.RR] — YYYY-MM-DD — <topic> (Domain <n>)
 - **Deliverable:** <the artifact committed today — note / exercise set / project increment>
 - **Studied:** <what was covered> → `notes/NN_topic.md`
 - **Drilled:** `exercises/NN_topic/` — <count> tasks, timed <mm:ss>
 - **Milestone test:** <score>%  → 🟩 / 🟨 (green needs ≥ 80%)
 - **Missed / weak:** <list; add to backlog above>
+- **Since last attempt:** <re-runs only: what changed, which weak areas are now green>
 - **Tomorrow:** <next topic>
 
 ---
@@ -61,8 +63,24 @@ Legend: ⬜ not started · 🟨 in progress · 🟩 green (milestone ≥ 80%)
   - **Task 5** — needed the RoleBinding→ClusterRole pattern handed over, then bound the wrong
     subject (`default:pod-viewer` vs `prod:prod-viewer`).
   - Strong: cluster-scoped reasoning (Task 4) and reading `can-i --list` output correctly (Task 6).
-- **Tomorrow:** Re-test RBAC (fresh drill, strict 15 min) → then Day 3 — etcd backup & restore.
-  Day 3/4 need real kubeadm VMs; kind cannot do them.
+- **Tomorrow:** **Day 02.01** — RBAC re-test (fresh drill, strict 15 min; must clear the four
+  backlog items above) → then Day 3 — etcd backup & restore. Day 3/4 need real kubeadm VMs;
+  kind cannot do them.
+- **Lab state:** cleaned 2026-07-15 (ns `dev`/`prod`, ClusterRoles `node-reader`/`pod-viewer`,
+  CRB `node-bot-binding`, SA `node-bot` all deleted); cluster healthy, 3 nodes Ready.
+
+---
+
+### Day 01.01 — 2026-07-14 — kubeadm cluster bring-up (Domain 1) — **re-run**
+- **Deliverable:** kind cluster torn down and rebuilt from scratch; `notes/01_kubeadm_bringup.md`
+  + `exercises/01_kubeadm_bringup/` regenerated.
+- **Studied:** Same material as Day 01 (learner-requested clean re-run, not a remediation).
+- **Drilled:** `exercises/01_kubeadm_bringup/` — 5 tasks
+- **Milestone test:** 100% → 🟩 (5/5, same task set)
+- **Since last attempt:** Identical 5/5 result on a fresh cluster — bring-up + component knowledge
+  is repeatable, not first-time luck. No new weak areas. The Linux-VM gap below is unchanged
+  (it's an environment limit, not a knowledge gap, so a re-run can't clear it).
+- **Tomorrow:** Day 2 — RBAC: SA/Role/Binding, `kubectl auth can-i`.
 
 ---
 
