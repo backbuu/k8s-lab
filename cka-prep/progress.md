@@ -7,7 +7,7 @@
 
 | Domain | Weight | Confidence (0–5) | Last test | Status |
 | ------ | :----: | :--------------: | :-------: | :----: |
-| 1. Cluster Architecture | 25% | 2 | 67% (RBAC) | 🟨 |
+| 1. Cluster Architecture | 25% | 3 | 83% (RBAC re-test, Day 02.01) | 🟩 |
 | 2. Workloads & Scheduling | 15% | 0 | — | ⬜ |
 | 3. Services & Networking | 20% | 0 | — | ⬜ |
 | 4. Storage | 10% | 0 | — | ⬜ |
@@ -22,13 +22,18 @@ Legend: ⬜ not started · 🟨 in progress · 🟩 green (milestone ≥ 80%)
 | — | — | — | — | — | — |
 
 ## Weak-area backlog (re-test until green)
-- **RBAC `apiGroups` values** — must be the literal group string (`""` core, `apps`, `batch`),
-  confirm with `k explain <res>` (first line). Invented/descriptive values silently grant nothing.
-- **RoleBinding → ClusterRole pattern** — the per-namespace reuse of a ClusterRole; reach for
-  `--clusterrole=` + `-n <ns>` when a task says "only in namespace X".
-- **Extend vs. widen** — adding verbs to an existing rule ≠ adding a new rule; re-read the task's
-  verb list against the Role before declaring done.
-- **Subject precision** — `system:serviceaccount:<ns>:<name>`; verify the exact SA, not a lookalike.
+- ~~**RBAC `apiGroups` values**~~ — green (Day 02.01 / 3b: `batch`, `apps`, `""` all correct unaided).
+- ~~**RoleBinding → ClusterRole pattern**~~ — green (Day 02.01 T5: correct first try, incl.
+  cross-namespace subject and the `kube-system` no-leak proof).
+- ~~**Extend vs. widen**~~ — green (Day 02.01 / 3b: four rule entries, no prior grant disturbed).
+  *Note: failed once more on first contact (T3) before going green — watch for regression.*
+- ~~**Subject precision**~~ — green (Day 02.01 T4: typo caught from a minimal nudge).
+- **RBAC speed** — 🟨 knowledge is green, but the 15:00 limit has never been met. Needs one clean
+  timed run.
+- **Over-grant vs. granted-as-specified** — over-grant means *exceeds the ask*; check each rule
+  against the task text before calling it a violation (Day 02.01 T6).
+- **Trust the question, not just the answer** — a malformed `--as=` returns a plausible `no`.
+  When a check surprises you, re-read the command before debugging the config.
 - kubeadm `init`/`join` mechanics — kind can't drill these; need Linux VMs before Day 3/Day 4.
 
 ---
@@ -46,6 +51,39 @@ Legend: ⬜ not started · 🟨 in progress · 🟩 green (milestone ≥ 80%)
 - **Missed / weak:** <list; add to backlog above>
 - **Since last attempt:** <re-runs only: what changed, which weak areas are now green>
 - **Tomorrow:** <next topic>
+
+---
+
+### Day 02.01 — 2026-07-15 — RBAC re-test (Domain 1) — **re-run**
+- **Deliverable:** `exercises/02_rbac/tasks_0201.md` — fresh scenario (build/staging, jobs/
+  configmaps/deployments/secrets/PVs), no reuse of the Day 02 objects.
+- **Drilled:** 6 tasks + 1 remediation variant (Task 3b), on the kind cluster.
+- **Milestone test:** 83% (5/6) → 🟩 — **but not inside the 15:00 limit** (~30 min elapsed,
+  including my inserted 3b drill and a broken Task 5 I had to reissue). A clean *timed* run
+  is still unproven; the knowledge bar is green, the speed bar is not.
+- **Missed / weak:**
+  - **Task 3 — failed.** Repeated the Day 02 failure mode exactly: added `list,watch` to the
+    `jobs` rule instead of adding a `configmaps` rule; target resource absent entirely.
+    Needed a conceptual hint (a rule is apiGroups × resources × verbs; new resource = new
+    list entry) before correcting. Self-corrected the widened Jobs verbs unprompted.
+  - **Task 4 — subject typo** (`systemaccount:` vs `system:serviceaccount:`) returned a
+    plausible `no` that tested nothing. Caught it from a minimal hint. Lesson logged: when a
+    check surprises you, verify the *question* before debugging the *answer*.
+  - **Task 6 —** called `secrets list` an over-grant; it was granted-as-specified by 3b.
+    Reviewer instinct right, spec-check wrong. Over-grant = exceeds the ask.
+  - Strong: `jobs.batch` used unprompted (apiGroup pinned at the source); RoleBinding→ClusterRole
+    correct first try incl. cross-namespace subject; `staging` yes / `kube-system` no leak proof;
+    grants-vs-baseline split correct.
+- **Since last attempt:** Task 3b (fresh variant, no hints) came back clean on all ten corners —
+  four rule entries, `apps` + `""` correct, no prior grant disturbed. On that evidence:
+  **apiGroups literals → green**, **extend-vs-widen → green**, **RoleBinding→ClusterRole → green**,
+  **subject precision → green** (typo caught unaided from a nudge). Day 02's four backlog items
+  are cleared. The gap closed *during* the session rather than before it — hence Task 3 stands
+  as a fail.
+- **Tomorrow:** Day 3 — etcd backup & restore. **Blocked on kind**: needs real kubeadm Linux VMs
+  (multipass). Optional: one clean 15:00 RBAC run to close the speed gap.
+- **Lab state:** NOT cleaned — `build`/`staging`, ClusterRoles `pv-inspector`/`secret-reader`,
+  CRB `pv-inspector-binding`, SAs `ci-runner`/`storage-bot` still live.
 
 ---
 
