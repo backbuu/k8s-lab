@@ -1,0 +1,30 @@
+title: CKA Prep
+description: A hands-on, self-coached study workspace for the Certified Kubernetes Administrator exam.
+theme: jekyll-theme-minimal
+
+# Source is the repo root because GitHub Pages only serves from / or /docs — it cannot
+# serve cka-prep/ directly. Excluding the lab dirs below is what scopes the site to the
+# study workspace, and it avoids duplicating progress.md (the single source of truth).
+exclude:
+  - CLAUDE.md
+  - README.md
+  - cka-prep/CLAUDE.md
+  - deployments/
+  - lab01/
+  - mealie/
+  - monitoring/
+  - yaml/
+  - .DS_Store
+
+plugins:
+  # Renders the study .md files as pages without needing YAML front matter added to each
+  # one — front matter would show up as noise in GitHub's own Markdown view.
+  - jekyll-optional-front-matter
+  # Rewrites the existing relative links (notes/02_rbac.md → …/notes/02_rbac.html) so the
+  # cross-links already in the study files resolve on the site.
+  - jekyll-relative-links
+  - jekyll-titles-from-headings
+
+relative_links:
+  enabled: true
+  collections: true
