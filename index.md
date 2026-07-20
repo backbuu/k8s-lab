@@ -10,7 +10,7 @@ Every day ships a deliverable and ends with a timed milestone test — no passiv
 
 | Domain | Weight | Status |
 | ------ | :----: | :----: |
-| 1. Cluster Architecture | 25% | 🟩 83% (RBAC re-test) |
+| 1. Cluster Architecture | 25% | 🟩 100% (kubeadm/control plane) |
 | 2. Workloads & Scheduling | 15% | ⬜ not started |
 | 3. Services & Networking | 20% | ⬜ not started |
 | 4. Storage | 10% | ⬜ not started |
@@ -47,7 +47,7 @@ Two numbers doing two different jobs:
 Timed task sets, no answers until attempted. A re-run gets a fresh scenario targeting the previous
 attempt's weak areas, and its own file (`tasks_0201.md` = Day 02.01).
 
-- [Kubeadm bring-up](cka-prep/exercises/01_kubeadm_bringup/tasks.md) · [re-run 01.02](cka-prep/exercises/01_kubeadm_bringup/tasks_0102.md)
+- [Kubeadm bring-up](cka-prep/exercises/01_kubeadm_bringup/tasks.md) · [re-run 01.02](cka-prep/exercises/01_kubeadm_bringup/tasks_0102.md) · [solutions](cka-prep/exercises/01_kubeadm_bringup/solutions.md)
 - [RBAC](cka-prep/exercises/02_rbac/tasks.md) · [re-run 02.01](cka-prep/exercises/02_rbac/tasks_0201.md)
 
 ## Reviews & capstone
