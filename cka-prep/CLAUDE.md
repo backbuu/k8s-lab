@@ -131,3 +131,23 @@ The procedure, as practiced by `reviews/progress_archive_days_00-02.md`:
 
 A request to "clean up", "reset", or "start fresh" means *this*, or a cluster/lab-state reset — it
 never means deleting log history.
+
+## This workspace is published (GitHub Pages)
+
+The study files are served as a Jekyll site. The config lives one level up, in the **repo root** —
+`../_config.yml` and `../index.md` — because Pages only serves from `/` or `/docs` and cannot serve
+`cka-prep/` directly. The site is scoped to the study workspace by `exclude:`-ing the lab dirs.
+
+Consequences when editing:
+
+- **`index.md` is a hand-maintained mirror, `progress.md` is the source of truth.** The root
+  `index.md` repeats the domain status table and links every note, drill, review, and archive file.
+  Nothing generates it. After a day is logged, update the mirrored status there too — otherwise the
+  published site quietly contradicts `progress.md`.
+- **New `notes/`, `exercises/`, or `reviews/` files need a link added to `index.md`** to be reachable
+  on the site. Drill re-runs get their own link next to the original (`tasks_0201.md` → "re-run 02.01").
+- **A new top-level lab directory in the parent repo needs an `exclude:` entry** in `../_config.yml`,
+  or it leaks into the study site.
+- Study files carry **no YAML front matter** by design — `jekyll-optional-front-matter` and
+  `jekyll-titles-from-headings` handle that, so the files stay clean in GitHub's Markdown view.
+  Don't add front matter. Relative links between study files work as-is via `jekyll-relative-links`.
