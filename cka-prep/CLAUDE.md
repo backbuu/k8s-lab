@@ -47,23 +47,57 @@ Two different numbers, for two different things — never conflate them:
 
 CKA is kubeadm-based multi-node. Prefer, in order:
 - **kubeadm** on 2+ VMs (closest to the exam — required for upgrade/etcd/certs tasks).
-- **kind** (multi-node config) for fast workload/networking/RBAC drills.
-- **minikube** for single-node quick checks.
+- **kind** (multi-node config) for fast workload/networking/RBAC drills — works on containerd via
+  the nerdctl provider, see below.
+- **minikube** / the k3s `rancher-desktop` context for single-node quick checks.
 
-```bash
-# fast multi-node kind cluster — name: cka-prep, 1 control-plane + 2 workers
-kind create cluster --config sources/kind-multinode.yaml
-```
+### Container engine: containerd, not moby (since 2026-07-22)
+
+Rancher Desktop runs **containerd**, not dockerd/moby. This is a deliberate CKA-alignment choice —
+the exam's clusters use containerd, so `crictl` and `nerdctl` are the right muscle memory. Consequences:
+
+- **There is no `/var/run/docker.sock` and no `docker` CLI.** Any drill, note, or solution that says
+  `docker …` is stale — translate it before handing it to the learner.
+- **kind needs the nerdctl provider.** Without this env var every `kind` command fails on a missing
+  Docker socket — it is not persisted, so export it per shell (or in the shell profile):
+
+  ```bash
+  export KIND_EXPERIMENTAL_PROVIDER=nerdctl
+  kind create cluster --config sources/kind-multinode.yaml   # 1 control-plane + 2 workers
+  ```
+
+  Verified 2026-07-22 on kind v0.32.0 / k8s v1.36.1: all 3 nodes Ready, full static-pod control
+  plane present. `kubectl` itself needs no env var — only `kind` does.
+- **Two containerd namespaces, and the distinction bites.** kind's *node containers* live in
+  `default`; the *cluster's workload images* live in `k8s.io`.
+
+  ```bash
+  nerdctl exec -it cka-prep-control-plane bash    # node shell — NO --namespace flag
+  nerdctl --namespace k8s.io images               # images the cluster actually runs
+  rdctl shell                                     # the Rancher Desktop VM itself, not a node
+  ```
+
+  Guessing wrong yields `no such container` or an empty list — a false alarm that looks like a
+  broken cluster.
+- **Docker Hub pulls work.** The `x509` fault logged on Day 01.02 was dockerd-side and died with it.
 
 **Know the environment gaps — say so rather than fake a drill:**
 
-- **kind cannot realistically drill** kubeadm `init`/`join` (Day 1), etcd restore (Day 3), or
-  cluster upgrade (Day 4). Those need real Linux VMs (multipass). This is an environment gap, not
-  a knowledge gap — log it as such.
+- **kubeadm `init`/`join` (Day 1) and cluster upgrade (Day 4)** still need real Linux VMs
+  (multipass) — kind hands you a pre-built cluster, so there is no bring-up or node-upgrade to
+  perform. Environment gap, not a knowledge gap — log it as such.
+- **etcd restore (Day 3) and static pods (Day 14) *are* drillable on kind** — it runs a genuine
+  static-pod control plane: `etcd-<node>`, `kube-apiserver-<node>`, `kube-scheduler-<node>`,
+  `kube-controller-manager-<node>`, with manifests in `/etc/kubernetes/manifests` and etcd certs in
+  `/etc/kubernetes/pki/etcd/`.
+- **k3s (`rancher-desktop`) has neither.** No etcd (SQLite at
+  `/var/lib/rancher/k3s/server/db/state.db`) and no `/etc/kubernetes/manifests` — the control plane
+  is one process, not static pods. Fine for workload drills, useless for Domain 1. Never run a
+  control-plane drill against this context by accident; check `kubectl config current-context` first.
 - **Mac-vs-node boundary.** `kubectl` works from anywhere with a kubeconfig, but node-level tooling
-  (`crictl`, `systemctl status kubelet`, `/etc/kubernetes/manifests`) only exists *inside* the node:
-  `docker exec -it cka-prep-control-plane bash` on kind, `ssh` on the real exam. Knowing which side
-  of that line a task lives on underpins most of Domain 5 (30%) — be explicit about it in drills.
+  (`crictl`, `systemctl status kubelet`, `/etc/kubernetes/manifests`) only exists *inside* the node
+  (`nerdctl exec` here, `ssh` on the real exam). Knowing which side of that line a task lives on
+  underpins most of Domain 5 (30%) — be explicit about it in drills.
 
 ## Daily loop (the ritual)
 

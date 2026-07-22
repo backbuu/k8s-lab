@@ -6,8 +6,14 @@ Covers `tasks_0102.md` (Day 01.02, 2026-07-20). Everything below is verified aga
 Almost all of this lives **inside the node**, not on the Mac:
 
 ```bash
-docker exec -it cka-prep-control-plane bash
+# containerd (current setup, since 2026-07-22):
+nerdctl --namespace k8s.io exec -it cka-prep-control-plane bash
+# was, under dockerd/moby: docker exec -it cka-prep-control-plane bash
 ```
+
+> **Stale environment.** This run was recorded on a kind cluster under dockerd. kind no longer works
+> here — see the container-engine section in `CLAUDE.md`. The *reasoning* below still stands; the
+> node-entry command does not.
 
 ---
 
@@ -163,8 +169,8 @@ kubectl run drain-victim --image=registry.k8s.io/pause:3.10 \
 `nodeName` bypasses the scheduler entirely (unlike `nodeSelector`, which only constrains it) —
 which is also why such a pod lands even on a cordoned node.
 
-`registry.k8s.io/pause` is used because **this cluster cannot pull from Docker Hub** — see the
-environment note in `progress.md`. `pause` is already cached on every node and needs no network.
+`registry.k8s.io/pause` was used because that cluster could not pull from Docker Hub — a fault
+**cleared on 2026-07-22** by the containerd switch (`docker.io` pulls now succeed). `pause` is already cached on every node and needs no network.
 
 ## Task 6 — why the control plane starts with no scheduler
 
